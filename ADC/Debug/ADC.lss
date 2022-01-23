@@ -3,27 +3,29 @@ ADC.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         000000a4  00000000  00000000  00000054  2**1
+  0 .text         000000ae  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  000000f8  2**0
+  1 .data         00000000  00800060  00800060  00000102  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  000000f8  2**0
+  2 .comment      00000030  00000000  00000000  00000102  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000128  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000134  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  00000164  2**0
+  4 .debug_aranges 00000030  00000000  00000000  00000170  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000005c1  00000000  00000000  00000184  2**0
+  5 .debug_info   0000063c  00000000  00000000  000001a0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 0000053d  00000000  00000000  00000745  2**0
+  6 .debug_abbrev 000005b1  00000000  00000000  000007dc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   000001ff  00000000  00000000  00000c82  2**0
+  7 .debug_line   00000237  00000000  00000000  00000d8d  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  00000e84  2**2
+  8 .debug_frame  00000044  00000000  00000000  00000fc4  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000002da  00000000  00000000  00000ea8  2**0
+  9 .debug_str    0000030d  00000000  00000000  00001008  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000010  00000000  00000000  00001182  2**0
+ 10 .debug_loc    00000075  00000000  00000000  00001315  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000020  00000000  00000000  0000138a  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -58,65 +60,84 @@ Disassembly of section .text:
   5a:	d4 e0       	ldi	r29, 0x04	; 4
   5c:	de bf       	out	0x3e, r29	; 62
   5e:	cd bf       	out	0x3d, r28	; 61
-  60:	0e 94 36 00 	call	0x6c	; 0x6c <main>
-  64:	0c 94 50 00 	jmp	0xa0	; 0xa0 <_exit>
+  60:	0e 94 4a 00 	call	0x94	; 0x94 <main>
+  64:	0c 94 55 00 	jmp	0xaa	; 0xaa <_exit>
 
 00000068 <__bad_interrupt>:
   68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
-0000006c <main>:
-#include <avr/io.h>
-#include <util/delay.h>
+0000006c <ADC_init>:
+/************************************************************************/
+/* ADC single ended initialization. Call this function in main function once.*/
+/************************************************************************/
+void ADC_init(void)
+{
+	ADC = 0;					// Set ADCL and ADCH to zero.We can also write these registers to zero individually (like ADCL = 0; ADCH = 0;).
+  6c:	15 b8       	out	0x05, r1	; 5
+  6e:	14 b8       	out	0x04, r1	; 4
+	ADMUX &= ~(1 << 5);			// Result is right adjusted.
+  70:	87 b1       	in	r24, 0x07	; 7
+  72:	8f 7d       	andi	r24, 0xDF	; 223
+  74:	87 b9       	out	0x07, r24	; 7
+//	ADMUX |= (1 << 7)|(1 << 6);	// ADC reference voltage to internal 2.56V with external capacitor at Aref pin.
+	ADMUX = (0x1 << 6);			// ADC reference voltage to external with external capacitor at Aref pin.
+  76:	80 e4       	ldi	r24, 0x40	; 64
+  78:	87 b9       	out	0x07, r24	; 7
+	ADCSRA |= (1 << 7)|(1 << 6)|(1 << 5)|(1 << 2);	// ADC enabled, ADC conversion started, ADC auto trigger enabled, prescaler is 16.
+  7a:	86 b1       	in	r24, 0x06	; 6
+  7c:	84 6e       	ori	r24, 0xE4	; 228
+  7e:	86 b9       	out	0x06, r24	; 6
+	SFIOR &= ~(0x0 << 5);		// ADC in free running mode.
+  80:	80 b7       	in	r24, 0x30	; 48
+  82:	80 bf       	out	0x30, r24	; 48
+  84:	08 95       	ret
+
+00000086 <adc_channel_read>:
+/************************************************************************/
+uint16_t adc_channel_read(uint8_t channel_number)
+{
+	uint16_t adc_value = 0;
+//	ADMUX |= (0x1f << 0);			// Set all channel select bits to 1
+	ADMUX = (channel_number << 0); // Set channel
+  86:	87 b9       	out	0x07, r24	; 7
+	ADCSRA|= (1 << 6);				// ADC conversion start bit must be on at the time of conversion.
+  88:	86 b1       	in	r24, 0x06	; 6
+  8a:	80 64       	ori	r24, 0x40	; 64
+  8c:	86 b9       	out	0x06, r24	; 6
+	adc_value = ADC;
+  8e:	84 b1       	in	r24, 0x04	; 4
+  90:	95 b1       	in	r25, 0x05	; 5
+	return (adc_value);
+  92:	08 95       	ret
+
+00000094 <main>:
+uint16_t adc_channel_read(uint8_t channel_number);
 
 int main(void)
 {
+	uint16_t adc_value = 0;
 	DDRC = 0xff;				// Set PORTC as output
-  6c:	8f ef       	ldi	r24, 0xFF	; 255
-  6e:	84 bb       	out	0x14, r24	; 20
+  94:	8f ef       	ldi	r24, 0xFF	; 255
+  96:	84 bb       	out	0x14, r24	; 20
 	DDRD = 0xff;				// Set PORTD as output
-  70:	81 bb       	out	0x11, r24	; 17
+  98:	81 bb       	out	0x11, r24	; 17
 	
-	/* ADC initialization start. */
-	ADC = 0;					// Set ADCL and ADCH to zero.We can also write these registers to zero individually (like ADCL = 0; ADCH = 0;).
-  72:	15 b8       	out	0x05, r1	; 5
-  74:	14 b8       	out	0x04, r1	; 4
-	ADMUX &= (0x0 << 0);		// ADC channel 0 is selected.
-  76:	87 b1       	in	r24, 0x07	; 7
-  78:	17 b8       	out	0x07, r1	; 7
-	ADMUX &= ~(1 << 5);			// Result is right adjusted.
-  7a:	87 b1       	in	r24, 0x07	; 7
-  7c:	8f 7d       	andi	r24, 0xDF	; 223
-  7e:	87 b9       	out	0x07, r24	; 7
-	ADMUX |= (1 << 7)|(1 << 6);	// ADC reference voltage to internal 2.56V with external capacitor at Aref pin.
-  80:	87 b1       	in	r24, 0x07	; 7
-  82:	80 6c       	ori	r24, 0xC0	; 192
-  84:	87 b9       	out	0x07, r24	; 7
-//	ADMUX = (0x1 << 6);			// ADC reference voltage to external with external capacitor at Aref pin.
-	ADCSRA |= (1 << 7)|(1 << 6)|(1 << 5)|(1 << 2);	// ADC enabled, ADC conversion started, ADC auto trigger enabled, prescaler is 16.
-  86:	86 b1       	in	r24, 0x06	; 6
-  88:	84 6e       	ori	r24, 0xE4	; 228
-  8a:	86 b9       	out	0x06, r24	; 6
-	SFIOR &= ~(0x0 << 5);		// ADC in free running mode.
-  8c:	80 b7       	in	r24, 0x30	; 48
-  8e:	80 bf       	out	0x30, r24	; 48
+	ADC_init();					// Initialize ADC by calling function
+  9a:	0e 94 36 00 	call	0x6c	; 0x6c <ADC_init>
 	
     while (1) 
     {
-		ADCSRA|= (1 << 6);		// ADC conversion start bit must be on at the time of conversion.
-  90:	86 b1       	in	r24, 0x06	; 6
-  92:	80 64       	ori	r24, 0x40	; 64
-  94:	86 b9       	out	0x06, r24	; 6
-		
-		PORTC = ADCL;			// Moving 8-bits of ADCL to PORTC.
-  96:	84 b1       	in	r24, 0x04	; 4
-  98:	85 bb       	out	0x15, r24	; 21
-		PORTD = ADCH;			// Moving 8-bits of ADCH to PORTD.
-  9a:	85 b1       	in	r24, 0x05	; 5
-  9c:	82 bb       	out	0x12, r24	; 18
-  9e:	f8 cf       	rjmp	.-16     	; 0x90 <main+0x24>
+		adc_value = adc_channel_read(4);
+  9e:	84 e0       	ldi	r24, 0x04	; 4
+  a0:	0e 94 43 00 	call	0x86	; 0x86 <adc_channel_read>
+ 		PORTC = (adc_value & 0xff);			// Moving 8-bits of ADCL to PORTC.
+  a4:	85 bb       	out	0x15, r24	; 21
+ 		PORTD = (adc_value >> 0);			// Moving 8-bits of ADCH to PORTD.
+  a6:	82 bb       	out	0x12, r24	; 18
+  a8:	fa cf       	rjmp	.-12     	; 0x9e <main+0xa>
 
-000000a0 <_exit>:
-  a0:	f8 94       	cli
+000000aa <_exit>:
+  aa:	f8 94       	cli
 
-000000a2 <__stop_program>:
-  a2:	ff cf       	rjmp	.-2      	; 0xa2 <__stop_program>
+000000ac <__stop_program>:
+  ac:	ff cf       	rjmp	.-2      	; 0xac <__stop_program>
