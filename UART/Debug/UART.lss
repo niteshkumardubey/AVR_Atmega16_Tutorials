@@ -3,29 +3,29 @@ UART.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         00000096  00000000  00000000  00000054  2**1
+  0 .text         00000124  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  000000ea  2**0
+  1 .data         00000000  00800060  00800060  00000178  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  000000ea  2**0
+  2 .comment      00000030  00000000  00000000  00000178  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000011c  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000001a8  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000030  00000000  00000000  00000158  2**0
+  4 .debug_aranges 00000030  00000000  00000000  000001e4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000631  00000000  00000000  00000188  2**0
+  5 .debug_info   0000064c  00000000  00000000  00000214  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000599  00000000  00000000  000007b9  2**0
+  6 .debug_abbrev 000005a8  00000000  00000000  00000860  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000209  00000000  00000000  00000d52  2**0
+  7 .debug_line   00000233  00000000  00000000  00000e08  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000044  00000000  00000000  00000f5c  2**2
+  8 .debug_frame  00000044  00000000  00000000  0000103c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000002f7  00000000  00000000  00000fa0  2**0
+  9 .debug_str    00000310  00000000  00000000  00001080  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000026  00000000  00000000  00001297  2**0
+ 10 .debug_loc    0000003e  00000000  00000000  00001390  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000020  00000000  00000000  000012bd  2**0
+ 11 .debug_ranges 00000020  00000000  00000000  000013ce  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -60,66 +60,144 @@ Disassembly of section .text:
   5a:	d4 e0       	ldi	r29, 0x04	; 4
   5c:	de bf       	out	0x3e, r29	; 62
   5e:	cd bf       	out	0x3d, r28	; 61
-  60:	0e 94 41 00 	call	0x82	; 0x82 <main>
-  64:	0c 94 49 00 	jmp	0x92	; 0x92 <_exit>
+  60:	0e 94 65 00 	call	0xca	; 0xca <main>
+  64:	0c 94 90 00 	jmp	0x120	; 0x120 <_exit>
 
 00000068 <__bad_interrupt>:
   68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
-0000006c <USART_Init>:
-	}
-}
-void USART_Init( unsigned int ubrr)
-{
-	/* Set baud rate */
-	UBRRH = ubrr>>8;
-  6c:	90 bd       	out	0x20, r25	; 32
-	UBRRL = ubrr;
-  6e:	89 b9       	out	0x09, r24	; 9
-	/* Enable receiver and transmitter */
-	UCSRB = (1<<RXEN)|(1<<TXEN);
-  70:	88 e1       	ldi	r24, 0x18	; 24
-  72:	8a b9       	out	0x0a, r24	; 10
-	/* Set frame format: 8data, 1stop bit */
-	UCSRC = (1<<URSEL)|(0<<USBS)|(3<<UCSZ0);
-  74:	86 e8       	ldi	r24, 0x86	; 134
-  76:	80 bd       	out	0x20, r24	; 32
-  78:	08 95       	ret
-
-0000007a <USART_Transmit>:
+0000006c <uart_init>:
+    }
 }
 
-void USART_Transmit( unsigned char data )
+void uart_init(uint16_t baud_rate)
 {
-	/* Wait for empty transmit buffer */
-	while ( !( UCSRA & (1<<UDRE)) )
-  7a:	5d 9b       	sbis	0x0b, 5	; 11
-  7c:	fe cf       	rjmp	.-4      	; 0x7a <USART_Transmit>
-	;
-	/* Put data into buffer, sends the data */
-	UDR = data;
-  7e:	8c b9       	out	0x0c, r24	; 12
-  80:	08 95       	ret
-
-00000082 <main>:
-void USART_Init( unsigned int ubrr);
-void USART_Transmit( unsigned char data );
-
-int main( void )
-{
-	USART_Init ( MYUBRR );
-  82:	85 e0       	ldi	r24, 0x05	; 5
+	uint16_t UBRR_val = (uint16_t)(F_CPU/(16 * baud_rate))-1;			// Formula to calculate UBRRH and UBRRL values
+  6c:	82 95       	swap	r24
+  6e:	92 95       	swap	r25
+  70:	90 7f       	andi	r25, 0xF0	; 240
+  72:	98 27       	eor	r25, r24
+  74:	80 7f       	andi	r24, 0xF0	; 240
+  76:	98 27       	eor	r25, r24
+  78:	9c 01       	movw	r18, r24
+  7a:	40 e0       	ldi	r20, 0x00	; 0
+  7c:	50 e0       	ldi	r21, 0x00	; 0
+  7e:	60 e4       	ldi	r22, 0x40	; 64
+  80:	72 e4       	ldi	r23, 0x42	; 66
+  82:	8f e0       	ldi	r24, 0x0F	; 15
   84:	90 e0       	ldi	r25, 0x00	; 0
-  86:	0e 94 36 00 	call	0x6c	; 0x6c <USART_Init>
-	while(1)
-	{
-		USART_Transmit('a');
-  8a:	81 e6       	ldi	r24, 0x61	; 97
-  8c:	0e 94 3d 00 	call	0x7a	; 0x7a <USART_Transmit>
-  90:	fc cf       	rjmp	.-8      	; 0x8a <main+0x8>
+  86:	0e 94 6e 00 	call	0xdc	; 0xdc <__udivmodsi4>
+  8a:	21 50       	subi	r18, 0x01	; 1
+  8c:	31 09       	sbc	r19, r1
+	UDR = 0;
+  8e:	1c b8       	out	0x0c, r1	; 12
+	UCSRA |= (1 << 6);										// Clear the transmit complete flag
+  90:	8b b1       	in	r24, 0x0b	; 11
+  92:	80 64       	ori	r24, 0x40	; 64
+  94:	8b b9       	out	0x0b, r24	; 11
+	UCSRB |= (1 << 7)|(1 << 6)|(1 << 5)|(1 << 4)|(1 << 3);	// Receive complete, Transmit complete, UDR empty interrupt enable and rx, tx enable 
+  96:	8a b1       	in	r24, 0x0a	; 10
+  98:	88 6f       	ori	r24, 0xF8	; 248
+  9a:	8a b9       	out	0x0a, r24	; 10
+	UCSRB &= ~((1 << 2)|(1 << 1)|(1 << 0));					// USART char size bit 2 (8 bit data), RXB8, TXB8 
+  9c:	8a b1       	in	r24, 0x0a	; 10
+  9e:	88 7f       	andi	r24, 0xF8	; 248
+  a0:	8a b9       	out	0x0a, r24	; 10
+	UCSRC &= ~(1 << 7);										// This bit must be 0 for updating UBRRH register.
+  a2:	80 b5       	in	r24, 0x20	; 32
+  a4:	8f 77       	andi	r24, 0x7F	; 127
+  a6:	80 bd       	out	0x20, r24	; 32
+	UBRRH |= (UBRR_val >> 8);								// Set baud rate
+  a8:	80 b5       	in	r24, 0x20	; 32
+  aa:	83 2b       	or	r24, r19
+  ac:	80 bd       	out	0x20, r24	; 32
+	UBRRL |= UBRR_val;
+  ae:	89 b1       	in	r24, 0x09	; 9
+  b0:	28 2b       	or	r18, r24
+  b2:	29 b9       	out	0x09, r18	; 9
+	UCSRC |= (1 << 7)|(1 << 2)|(1 << 1);					// 7th bit must be 1 to update UCSRC, USART char size bit 1 and 0 (8 bit data)
+  b4:	80 b5       	in	r24, 0x20	; 32
+  b6:	86 68       	ori	r24, 0x86	; 134
+  b8:	80 bd       	out	0x20, r24	; 32
+	UCSRC &= ~((1 << 6)|(1 << 5)|(1 << 4)|(1 << 3)|(1 << 0));// Asynchronous operation, Parity disabled, stop bit 1, Clock polarity 0 in asynchronous mode
+  ba:	80 b5       	in	r24, 0x20	; 32
+  bc:	86 78       	andi	r24, 0x86	; 134
+  be:	80 bd       	out	0x20, r24	; 32
+  c0:	08 95       	ret
 
-00000092 <_exit>:
-  92:	f8 94       	cli
+000000c2 <uart_transmitData>:
+}
 
-00000094 <__stop_program>:
-  94:	ff cf       	rjmp	.-2      	; 0x94 <__stop_program>
+void uart_transmitData(unsigned char data)
+{
+	while(!(UCSRA & (1 << 5)));
+  c2:	5d 9b       	sbis	0x0b, 5	; 11
+  c4:	fe cf       	rjmp	.-4      	; 0xc2 <uart_transmitData>
+	UDR = data;
+  c6:	8c b9       	out	0x0c, r24	; 12
+  c8:	08 95       	ret
+
+000000ca <main>:
+
+void uart_init(uint16_t baud_rate);
+void uart_transmitData(unsigned char data);
+int main(void)
+{
+	sei();
+  ca:	78 94       	sei
+	uart_init(9600);
+  cc:	80 e8       	ldi	r24, 0x80	; 128
+  ce:	95 e2       	ldi	r25, 0x25	; 37
+  d0:	0e 94 36 00 	call	0x6c	; 0x6c <uart_init>
+    while (1) 
+    {
+		uart_transmitData(1);
+  d4:	81 e0       	ldi	r24, 0x01	; 1
+  d6:	0e 94 61 00 	call	0xc2	; 0xc2 <uart_transmitData>
+  da:	fc cf       	rjmp	.-8      	; 0xd4 <main+0xa>
+
+000000dc <__udivmodsi4>:
+  dc:	a1 e2       	ldi	r26, 0x21	; 33
+  de:	1a 2e       	mov	r1, r26
+  e0:	aa 1b       	sub	r26, r26
+  e2:	bb 1b       	sub	r27, r27
+  e4:	fd 01       	movw	r30, r26
+  e6:	0d c0       	rjmp	.+26     	; 0x102 <__udivmodsi4_ep>
+
+000000e8 <__udivmodsi4_loop>:
+  e8:	aa 1f       	adc	r26, r26
+  ea:	bb 1f       	adc	r27, r27
+  ec:	ee 1f       	adc	r30, r30
+  ee:	ff 1f       	adc	r31, r31
+  f0:	a2 17       	cp	r26, r18
+  f2:	b3 07       	cpc	r27, r19
+  f4:	e4 07       	cpc	r30, r20
+  f6:	f5 07       	cpc	r31, r21
+  f8:	20 f0       	brcs	.+8      	; 0x102 <__udivmodsi4_ep>
+  fa:	a2 1b       	sub	r26, r18
+  fc:	b3 0b       	sbc	r27, r19
+  fe:	e4 0b       	sbc	r30, r20
+ 100:	f5 0b       	sbc	r31, r21
+
+00000102 <__udivmodsi4_ep>:
+ 102:	66 1f       	adc	r22, r22
+ 104:	77 1f       	adc	r23, r23
+ 106:	88 1f       	adc	r24, r24
+ 108:	99 1f       	adc	r25, r25
+ 10a:	1a 94       	dec	r1
+ 10c:	69 f7       	brne	.-38     	; 0xe8 <__udivmodsi4_loop>
+ 10e:	60 95       	com	r22
+ 110:	70 95       	com	r23
+ 112:	80 95       	com	r24
+ 114:	90 95       	com	r25
+ 116:	9b 01       	movw	r18, r22
+ 118:	ac 01       	movw	r20, r24
+ 11a:	bd 01       	movw	r22, r26
+ 11c:	cf 01       	movw	r24, r30
+ 11e:	08 95       	ret
+
+00000120 <_exit>:
+ 120:	f8 94       	cli
+
+00000122 <__stop_program>:
+ 122:	ff cf       	rjmp	.-2      	; 0x122 <__stop_program>
