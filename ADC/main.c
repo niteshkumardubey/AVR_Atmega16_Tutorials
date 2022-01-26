@@ -6,7 +6,7 @@
  */ 
 
 /************************************************************************/
-/* In this code ADC value is send to PORTB and PORTC. 
+/* In this code ADC value is send to PORTC and PORTD. 
    PORTS will be toggle as per the patterns of ADC values. 
    
    ADC_Value  = (Vin*1024)/V_ref   */
