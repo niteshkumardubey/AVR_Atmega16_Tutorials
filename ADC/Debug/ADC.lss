@@ -3,29 +3,29 @@ ADC.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         000000ae  00000000  00000000  00000054  2**1
+  0 .text         000000ee  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  00000102  2**0
+  1 .data         00000000  00800060  00800060  00000142  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  00000102  2**0
+  2 .comment      00000030  00000000  00000000  00000142  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000134  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000174  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000030  00000000  00000000  00000170  2**0
+  4 .debug_aranges 00000030  00000000  00000000  000001b0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   0000063c  00000000  00000000  000001a0  2**0
+  5 .debug_info   00000656  00000000  00000000  000001e0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000005b1  00000000  00000000  000007dc  2**0
+  6 .debug_abbrev 000005b3  00000000  00000000  00000836  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000237  00000000  00000000  00000d8d  2**0
+  7 .debug_line   00000231  00000000  00000000  00000de9  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000044  00000000  00000000  00000fc4  2**2
+  8 .debug_frame  00000044  00000000  00000000  0000101c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    0000030d  00000000  00000000  00001008  2**0
+  9 .debug_str    0000031f  00000000  00000000  00001060  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000075  00000000  00000000  00001315  2**0
+ 10 .debug_loc    0000009d  00000000  00000000  0000137f  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000020  00000000  00000000  0000138a  2**0
+ 11 .debug_ranges 00000020  00000000  00000000  0000141c  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -61,7 +61,7 @@ Disassembly of section .text:
   5c:	de bf       	out	0x3e, r29	; 62
   5e:	cd bf       	out	0x3d, r28	; 61
   60:	0e 94 4a 00 	call	0x94	; 0x94 <main>
-  64:	0c 94 55 00 	jmp	0xaa	; 0xaa <_exit>
+  64:	0c 94 75 00 	jmp	0xea	; 0xea <_exit>
 
 00000068 <__bad_interrupt>:
   68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -93,11 +93,11 @@ void ADC_init(void)
   84:	08 95       	ret
 
 00000086 <adc_channel_read>:
+Returns: ADC value in 16 bit                                             */
 /************************************************************************/
 uint16_t adc_channel_read(uint8_t channel_number)
 {
 	uint16_t adc_value = 0;
-//	ADMUX |= (0x1f << 0);			// Set all channel select bits to 1
 	ADMUX = (channel_number << 0); // Set channel
   86:	87 b9       	out	0x07, r24	; 7
 	ADCSRA|= (1 << 6);				// ADC conversion start bit must be on at the time of conversion.
@@ -111,33 +111,69 @@ uint16_t adc_channel_read(uint8_t channel_number)
   92:	08 95       	ret
 
 00000094 <main>:
-uint16_t adc_channel_read(uint8_t channel_number);
 
 int main(void)
 {
 	uint16_t adc_value = 0;
+	float temperature = 0;
 	DDRC = 0xff;				// Set PORTC as output
   94:	8f ef       	ldi	r24, 0xFF	; 255
   96:	84 bb       	out	0x14, r24	; 20
-	DDRD = 0xff;				// Set PORTD as output
-  98:	81 bb       	out	0x11, r24	; 17
 	
 	ADC_init();					// Initialize ADC by calling function
-  9a:	0e 94 36 00 	call	0x6c	; 0x6c <ADC_init>
+  98:	0e 94 36 00 	call	0x6c	; 0x6c <ADC_init>
 	
     while (1) 
     {
 		adc_value = adc_channel_read(4);
-  9e:	84 e0       	ldi	r24, 0x04	; 4
-  a0:	0e 94 43 00 	call	0x86	; 0x86 <adc_channel_read>
- 		PORTC = (adc_value & 0xff);			// Moving 8-bits of ADCL to PORTC.
-  a4:	85 bb       	out	0x15, r24	; 21
- 		PORTD = (adc_value >> 0);			// Moving 8-bits of ADCH to PORTD.
-  a6:	82 bb       	out	0x12, r24	; 18
-  a8:	fa cf       	rjmp	.-12     	; 0x9e <main+0xa>
+  9c:	84 e0       	ldi	r24, 0x04	; 4
+  9e:	0e 94 43 00 	call	0x86	; 0x86 <adc_channel_read>
+		temperature = (adc_value * 5000)/(1024 * 10); // Formula to convert ADC value to temperature in Celcius
+  a2:	28 e8       	ldi	r18, 0x88	; 136
+  a4:	33 e1       	ldi	r19, 0x13	; 19
+  a6:	ac 01       	movw	r20, r24
+  a8:	42 9f       	mul	r20, r18
+  aa:	c0 01       	movw	r24, r0
+  ac:	43 9f       	mul	r20, r19
+  ae:	90 0d       	add	r25, r0
+  b0:	52 9f       	mul	r21, r18
+  b2:	90 0d       	add	r25, r0
+  b4:	11 24       	eor	r1, r1
+  b6:	60 e0       	ldi	r22, 0x00	; 0
+  b8:	78 e2       	ldi	r23, 0x28	; 40
+  ba:	0e 94 61 00 	call	0xc2	; 0xc2 <__udivmodhi4>
+		PORTC = temperature;
+  be:	65 bb       	out	0x15, r22	; 21
+  c0:	ed cf       	rjmp	.-38     	; 0x9c <main+0x8>
 
-000000aa <_exit>:
-  aa:	f8 94       	cli
+000000c2 <__udivmodhi4>:
+  c2:	aa 1b       	sub	r26, r26
+  c4:	bb 1b       	sub	r27, r27
+  c6:	51 e1       	ldi	r21, 0x11	; 17
+  c8:	07 c0       	rjmp	.+14     	; 0xd8 <__udivmodhi4_ep>
 
-000000ac <__stop_program>:
-  ac:	ff cf       	rjmp	.-2      	; 0xac <__stop_program>
+000000ca <__udivmodhi4_loop>:
+  ca:	aa 1f       	adc	r26, r26
+  cc:	bb 1f       	adc	r27, r27
+  ce:	a6 17       	cp	r26, r22
+  d0:	b7 07       	cpc	r27, r23
+  d2:	10 f0       	brcs	.+4      	; 0xd8 <__udivmodhi4_ep>
+  d4:	a6 1b       	sub	r26, r22
+  d6:	b7 0b       	sbc	r27, r23
+
+000000d8 <__udivmodhi4_ep>:
+  d8:	88 1f       	adc	r24, r24
+  da:	99 1f       	adc	r25, r25
+  dc:	5a 95       	dec	r21
+  de:	a9 f7       	brne	.-22     	; 0xca <__udivmodhi4_loop>
+  e0:	80 95       	com	r24
+  e2:	90 95       	com	r25
+  e4:	bc 01       	movw	r22, r24
+  e6:	cd 01       	movw	r24, r26
+  e8:	08 95       	ret
+
+000000ea <_exit>:
+  ea:	f8 94       	cli
+
+000000ec <__stop_program>:
+  ec:	ff cf       	rjmp	.-2      	; 0xec <__stop_program>

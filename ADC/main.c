@@ -1,4 +1,5 @@
 /*
+ * This is a simple example. We can remove the port pattern option
  * ADC.c (Single ended conversion) 
  * Version 1
  * Created: 23-01-2022 18:58:06
@@ -6,11 +7,10 @@
  */ 
 
 /************************************************************************/
-/* In this code ADC value is send to PORTB and PORTC. 
-   PORTS will be toggle as per the patterns of ADC values. 
-   
-   ADC_Value  = (Vin*1024)/V_ref   */
+/* In this code Temperature Sensor (LM35) is calibrated. Temperature value is send to PORTC. 
+   PORTC will be toggle as per the patterns of temperature in degree celcius. 
 
+   Temperature = (ADC_Value * V_REF_mV)/(1024 * 10);*/
 /************************************************************************/
 #define F_CPU 1000000UL
 
@@ -23,16 +23,16 @@ uint16_t adc_channel_read(uint8_t channel_number);
 int main(void)
 {
 	uint16_t adc_value = 0;
+	float temperature = 0;
 	DDRC = 0xff;				// Set PORTC as output
-	DDRD = 0xff;				// Set PORTD as output
 	
 	ADC_init();					// Initialize ADC by calling function
 	
     while (1) 
     {
 		adc_value = adc_channel_read(4);
- 		PORTC = (adc_value & 0xff);			// Moving 8-bits of ADCL to PORTC.
- 		PORTD = (adc_value >> 0);			// Moving 8-bits of ADCH to PORTD.
+		temperature = (adc_value * 5000)/(1024 * 10); // Formula to convert ADC value to temperature in Celcius
+		PORTC = temperature;
     }
 }
 
@@ -57,7 +57,6 @@ Returns: ADC value in 16 bit                                             */
 uint16_t adc_channel_read(uint8_t channel_number)
 {
 	uint16_t adc_value = 0;
-//	ADMUX |= (0x1f << 0);			// Set all channel select bits to 1
 	ADMUX = (channel_number << 0); // Set channel
 	ADCSRA|= (1 << 6);				// ADC conversion start bit must be on at the time of conversion.
 	adc_value = ADC;
