@@ -6,7 +6,7 @@
  */ 
 
 /************************************************************************/
-/* In this code ADC value is send to PORTB and PORTC. 
+/* In this code ADC value is send to PORTC and PORTD. 
    PORTS will be toggle as per the patterns of ADC values. 
    
    ADC_Value  = (Vin*1024)/V_ref   */
@@ -57,7 +57,6 @@ Returns: ADC value in 16 bit                                             */
 uint16_t adc_channel_read(uint8_t channel_number)
 {
 	uint16_t adc_value = 0;
-//	ADMUX |= (0x1f << 0);			// Set all channel select bits to 1
 	ADMUX = (channel_number << 0); // Set channel
 	ADCSRA|= (1 << 6);				// ADC conversion start bit must be on at the time of conversion.
 	adc_value = ADC;
