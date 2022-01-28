@@ -7,9 +7,8 @@
 #define F_CPU 8000000UL
 #define UBRR_VAL ((F_CPU/(16 * baud_rate))-1)			// Formula to calculate UBRRH and UBRRL values
 
-#include <stdlib.h>
 #include <avr/io.h>
-#include <avr/interrupt.h>
+//#include <stdlib.h>
 #include <math.h>
 
 char buff[50];
@@ -29,12 +28,12 @@ int main(void)
 	
     while (1) 
     {
-		c = uart_getChar();
-		uart_sendChar(c);
-// 		uart_sendChar('A');
-// 		uart_sendString_ln("Nitesh");
-// 		uart_sendInt(13);
-// 		uart_sendFloat(12.55, 2);
+// 		c = uart_getChar();
+// 		uart_sendChar(c);
+		uart_sendChar('A');
+		uart_sendString_ln("Nitesh");
+		uart_sendInt(13);
+		uart_sendFloat(12.55, 2);
     }
 }
 
