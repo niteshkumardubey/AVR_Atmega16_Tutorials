@@ -19,15 +19,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   7 .debug_abbrev 00000697  00000000  00000000  00001733  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000003e2  00000000  00000000  00001dca  2**0
+  8 .debug_line   000003fe  00000000  00000000  00001dca  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000148  00000000  00000000  000021ac  2**2
+  9 .debug_frame  00000148  00000000  00000000  000021c8  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000003d9  00000000  00000000  000022f4  2**0
+ 10 .debug_str    000003d9  00000000  00000000  00002310  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000005b0  00000000  00000000  000026cd  2**0
+ 11 .debug_loc    000005b0  00000000  00000000  000026e9  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000060  00000000  00000000  00002c7d  2**0
+ 12 .debug_ranges 00000060  00000000  00000000  00002c99  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -161,11 +161,11 @@ Disassembly of section .text:
  110:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 00000114 <uart_init>:
-	uint8_t i = 0;
-	while (string[i] != '\0')
-	{
-		uart_sendChar(string[i++]);
-	}
+char uart_getChar(void)
+{
+	while(!(UCSRA & (1 << RXC)));
+	
+	return UDR;
 }
  114:	2a b1       	in	r18, 0x0a	; 10
  116:	28 61       	ori	r18, 0x18	; 24
@@ -228,97 +228,53 @@ Disassembly of section .text:
  186:	08 95       	ret
 
 00000188 <uart_sendString_ln>:
-
-void uart_sendString_ln(char* string)
-{
  188:	0f 93       	push	r16
  18a:	1f 93       	push	r17
  18c:	cf 93       	push	r28
  18e:	8c 01       	movw	r16, r24
-	uint8_t i = 0;
  190:	c0 e0       	ldi	r28, 0x00	; 0
-	while (string[i] != '\0')
  192:	03 c0       	rjmp	.+6      	; 0x19a <uart_sendString_ln+0x12>
-	{
-		uart_sendChar(string[i++]);
  194:	cf 5f       	subi	r28, 0xFF	; 255
  196:	0e 94 c0 00 	call	0x180	; 0x180 <uart_sendChar>
-}
-
-void uart_sendString_ln(char* string)
-{
-	uint8_t i = 0;
-	while (string[i] != '\0')
  19a:	f8 01       	movw	r30, r16
  19c:	ec 0f       	add	r30, r28
  19e:	f1 1d       	adc	r31, r1
  1a0:	80 81       	ld	r24, Z
  1a2:	81 11       	cpse	r24, r1
  1a4:	f7 cf       	rjmp	.-18     	; 0x194 <uart_sendString_ln+0xc>
-	{
-		uart_sendChar(string[i++]);
-	}
-	uart_sendChar('\n');
  1a6:	8a e0       	ldi	r24, 0x0A	; 10
  1a8:	0e 94 c0 00 	call	0x180	; 0x180 <uart_sendChar>
-}
  1ac:	cf 91       	pop	r28
  1ae:	1f 91       	pop	r17
  1b0:	0f 91       	pop	r16
  1b2:	08 95       	ret
 
 000001b4 <reverse>:
-
-void reverse(char* string, int len)
-{
-	int current_position = 0, next_position = len - 1, temp;
  1b4:	61 50       	subi	r22, 0x01	; 1
  1b6:	71 09       	sbc	r23, r1
  1b8:	20 e0       	ldi	r18, 0x00	; 0
  1ba:	30 e0       	ldi	r19, 0x00	; 0
-	while (current_position < next_position)
  1bc:	0e c0       	rjmp	.+28     	; 0x1da <reverse+0x26>
-	{
-		temp = string[current_position];
  1be:	dc 01       	movw	r26, r24
  1c0:	a2 0f       	add	r26, r18
  1c2:	b3 1f       	adc	r27, r19
  1c4:	4c 91       	ld	r20, X
-		string[current_position] = string[next_position];
  1c6:	fc 01       	movw	r30, r24
  1c8:	e6 0f       	add	r30, r22
  1ca:	f7 1f       	adc	r31, r23
  1cc:	50 81       	ld	r21, Z
  1ce:	5c 93       	st	X, r21
-		string[next_position] = temp;
  1d0:	40 83       	st	Z, r20
-		current_position++;
  1d2:	2f 5f       	subi	r18, 0xFF	; 255
  1d4:	3f 4f       	sbci	r19, 0xFF	; 255
-		next_position--;
  1d6:	61 50       	subi	r22, 0x01	; 1
  1d8:	71 09       	sbc	r23, r1
-}
-
-void reverse(char* string, int len)
-{
-	int current_position = 0, next_position = len - 1, temp;
-	while (current_position < next_position)
  1da:	26 17       	cp	r18, r22
  1dc:	37 07       	cpc	r19, r23
  1de:	7c f3       	brlt	.-34     	; 0x1be <reverse+0xa>
-		string[current_position] = string[next_position];
-		string[next_position] = temp;
-		current_position++;
-		next_position--;
-	}
-}
  1e0:	08 95       	ret
 
 000001e2 <intToStr>:
-
-int intToStr(long val, char destination[], int digits)
-{
  1e2:	cf 92       	push	r12
  1e4:	df 92       	push	r13
  1e6:	ef 92       	push	r14
@@ -329,13 +285,9 @@ int intToStr(long val, char destination[], int digits)
  1f0:	df 93       	push	r29
  1f2:	8a 01       	movw	r16, r20
  1f4:	69 01       	movw	r12, r18
-	int i = 0;
  1f6:	c0 e0       	ldi	r28, 0x00	; 0
  1f8:	d0 e0       	ldi	r29, 0x00	; 0
-	while (val)
  1fa:	11 c0       	rjmp	.+34     	; 0x21e <__EEPROM_REGION_LENGTH__+0x1e>
-	{
-		destination[i++] = (val % 10) + '0';
  1fc:	78 01       	movw	r14, r16
  1fe:	ec 0e       	add	r14, r28
  200:	fd 1e       	adc	r15, r29
@@ -347,65 +299,33 @@ int intToStr(long val, char destination[], int digits)
  20e:	60 5d       	subi	r22, 0xD0	; 208
  210:	f7 01       	movw	r30, r14
  212:	60 83       	st	Z, r22
-		val = val / 10;
  214:	62 2f       	mov	r22, r18
  216:	73 2f       	mov	r23, r19
  218:	84 2f       	mov	r24, r20
  21a:	95 2f       	mov	r25, r21
-int intToStr(long val, char destination[], int digits)
-{
-	int i = 0;
-	while (val)
-	{
-		destination[i++] = (val % 10) + '0';
  21c:	21 96       	adiw	r28, 0x01	; 1
-}
-
-int intToStr(long val, char destination[], int digits)
-{
-	int i = 0;
-	while (val)
  21e:	61 15       	cp	r22, r1
  220:	71 05       	cpc	r23, r1
  222:	81 05       	cpc	r24, r1
  224:	91 05       	cpc	r25, r1
  226:	51 f7       	brne	.-44     	; 0x1fc <intToStr+0x1a>
  228:	06 c0       	rjmp	.+12     	; 0x236 <__EEPROM_REGION_LENGTH__+0x36>
-		val = val / 10;
-	}
-
-	/* Add 0s in beginning. */
-	while (i < digits)
-	destination[i++] = '0';
  22a:	f8 01       	movw	r30, r16
  22c:	ec 0f       	add	r30, r28
  22e:	fd 1f       	adc	r31, r29
  230:	80 e3       	ldi	r24, 0x30	; 48
  232:	80 83       	st	Z, r24
  234:	21 96       	adiw	r28, 0x01	; 1
-		destination[i++] = (val % 10) + '0';
-		val = val / 10;
-	}
-
-	/* Add 0s in beginning. */
-	while (i < digits)
  236:	cc 15       	cp	r28, r12
  238:	dd 05       	cpc	r29, r13
  23a:	bc f3       	brlt	.-18     	; 0x22a <__EEPROM_REGION_LENGTH__+0x2a>
-	destination[i++] = '0';
-
-	/* Reverse string. */
-	reverse(destination, i);
  23c:	be 01       	movw	r22, r28
  23e:	c8 01       	movw	r24, r16
  240:	0e 94 da 00 	call	0x1b4	; 0x1b4 <reverse>
-	destination[i] = '\0';
  244:	f8 01       	movw	r30, r16
  246:	ec 0f       	add	r30, r28
  248:	fd 1f       	adc	r31, r29
  24a:	10 82       	st	Z, r1
-	return i;
-}
  24c:	ce 01       	movw	r24, r28
  24e:	df 91       	pop	r29
  250:	cf 91       	pop	r28
@@ -418,26 +338,17 @@ int intToStr(long val, char destination[], int digits)
  25e:	08 95       	ret
 
 00000260 <uart_sendInt>:
-
-void uart_sendInt(long val)
-{
-	intToStr(val, buff, 0);
  260:	20 e0       	ldi	r18, 0x00	; 0
  262:	30 e0       	ldi	r19, 0x00	; 0
  264:	48 e6       	ldi	r20, 0x68	; 104
  266:	50 e0       	ldi	r21, 0x00	; 0
  268:	0e 94 f1 00 	call	0x1e2	; 0x1e2 <intToStr>
-	uart_sendString_ln(buff);
  26c:	88 e6       	ldi	r24, 0x68	; 104
  26e:	90 e0       	ldi	r25, 0x00	; 0
  270:	0e 94 c4 00 	call	0x188	; 0x188 <uart_sendString_ln>
  274:	08 95       	ret
 
 00000276 <ftoa>:
-}
-
-void ftoa(double val, char* res, int afterpoint)
-{
  276:	8f 92       	push	r8
  278:	9f 92       	push	r9
  27a:	af 92       	push	r10
@@ -454,12 +365,7 @@ void ftoa(double val, char* res, int afterpoint)
  290:	5c 01       	movw	r10, r24
  292:	8a 01       	movw	r16, r20
  294:	e9 01       	movw	r28, r18
-	// Extract integer part
-	int ipart = (int)val;
  296:	0e 94 30 02 	call	0x460	; 0x460 <__fixsfsi>
-
-	// Extract floating part
-	float fpart = val - (float)ipart;
  29a:	6b 01       	movw	r12, r22
  29c:	77 0f       	add	r23, r23
  29e:	ee 08       	sbc	r14, r14
@@ -474,9 +380,6 @@ void ftoa(double val, char* res, int afterpoint)
  2b2:	0e 94 c3 01 	call	0x386	; 0x386 <__subsf3>
  2b6:	4b 01       	movw	r8, r22
  2b8:	5c 01       	movw	r10, r24
-
-	// convert integer part to string
-	int i = intToStr(ipart, res, 0);
  2ba:	20 e0       	ldi	r18, 0x00	; 0
  2bc:	30 e0       	ldi	r19, 0x00	; 0
  2be:	a8 01       	movw	r20, r16
@@ -484,22 +387,13 @@ void ftoa(double val, char* res, int afterpoint)
  2c2:	b6 01       	movw	r22, r12
  2c4:	0e 94 f1 00 	call	0x1e2	; 0x1e2 <intToStr>
  2c8:	7c 01       	movw	r14, r24
-
-	// check for display option after point
-	if (afterpoint != 0) {
  2ca:	20 97       	sbiw	r28, 0x00	; 0
  2cc:	49 f1       	breq	.+82     	; 0x320 <ftoa+0xaa>
-		res[i] = '.'; // add dot
  2ce:	f8 01       	movw	r30, r16
  2d0:	e8 0f       	add	r30, r24
  2d2:	f9 1f       	adc	r31, r25
  2d4:	8e e2       	ldi	r24, 0x2E	; 46
  2d6:	80 83       	st	Z, r24
-
-		// Get the value of fraction part upto given no.
-		// of points after dot. The third parameter
-		// is needed to handle cases like 233.007
-		fpart = fpart * pow(10, afterpoint);
  2d8:	be 01       	movw	r22, r28
  2da:	0d 2e       	mov	r0, r29
  2dc:	00 0c       	add	r0, r0
@@ -518,8 +412,6 @@ void ftoa(double val, char* res, int afterpoint)
  2fa:	c5 01       	movw	r24, r10
  2fc:	b4 01       	movw	r22, r8
  2fe:	0e 94 f4 02 	call	0x5e8	; 0x5e8 <__mulsf3>
-
-		intToStr((int)fpart, res + i + 1, afterpoint);
  302:	2f ef       	ldi	r18, 0xFF	; 255
  304:	e2 1a       	sub	r14, r18
  306:	f2 0a       	sbc	r15, r18
@@ -533,8 +425,6 @@ void ftoa(double val, char* res, int afterpoint)
  318:	99 0b       	sbc	r25, r25
  31a:	9e 01       	movw	r18, r28
  31c:	0e 94 f1 00 	call	0x1e2	; 0x1e2 <intToStr>
-	}
-}
  320:	df 91       	pop	r29
  322:	cf 91       	pop	r28
  324:	1f 91       	pop	r17
@@ -550,22 +440,17 @@ void ftoa(double val, char* res, int afterpoint)
  338:	08 95       	ret
 
 0000033a <uart_sendFloat>:
-
-void uart_sendFloat(double val, int afterDecimal)
-{
  33a:	9a 01       	movw	r18, r20
-	ftoa(val, buff, afterDecimal);
  33c:	48 e6       	ldi	r20, 0x68	; 104
  33e:	50 e0       	ldi	r21, 0x00	; 0
  340:	0e 94 3b 01 	call	0x276	; 0x276 <ftoa>
-	uart_sendString_ln(buff);
  344:	88 e6       	ldi	r24, 0x68	; 104
  346:	90 e0       	ldi	r25, 0x00	; 0
  348:	0e 94 c4 00 	call	0x188	; 0x188 <uart_sendString_ln>
  34c:	08 95       	ret
 
 0000034e <main>:
-char uart_getChar(void);
+
 
 int main(void)
 {
