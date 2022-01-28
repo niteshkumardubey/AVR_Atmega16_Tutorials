@@ -20,16 +20,21 @@ void uart_sendString(char* string);
 void uart_sendString_ln(char* string);
 void uart_sendInt(long val);
 void uart_sendFloat(double val, int afterDecimal);
+char uart_getChar(void);
 
 int main(void)
 {
+	char c;
 	uart_init(9600);
 	
     while (1) 
     {
-		//uart_sendString_ln("Nitesh");
-		uart_sendInt(13);
-		uart_sendFloat(12.55, 2);
+		c = uart_getChar();
+		uart_sendChar(c);
+// 		uart_sendChar('A');
+// 		uart_sendString_ln("Nitesh");
+// 		uart_sendInt(13);
+// 		uart_sendFloat(12.55, 2);
     }
 }
 
@@ -135,4 +140,11 @@ void uart_sendFloat(double val, int afterDecimal)
 {
 	ftoa(val, buff, afterDecimal);
 	uart_sendString_ln(buff);
+}
+
+char uart_getChar(void)
+{
+	while(!(UCSRA & (1 << 7)));
+	
+	return (UDR);
 }
