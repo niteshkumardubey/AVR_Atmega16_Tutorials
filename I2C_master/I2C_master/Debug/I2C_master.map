@@ -10,8 +10,18 @@ Discarded input sections
  .text          0x00000000        0x0 main.o
  .data          0x00000000        0x0 main.o
  .bss           0x00000000        0x0 main.o
- .text.start_condition_init
+ .text.I2C_start_condition_init
+                0x00000000       0x3e main.o
+ .text.I2C_repeated_start_condition_init
+                0x00000000       0x3e main.o
+ .text.I2C_write
+                0x00000000       0x26 main.o
+ .text.I2C_read_ack
                 0x00000000       0x10 main.o
+ .text.I2C_read_nack
+                0x00000000       0x10 main.o
+ .text.I2C_stop_transmission
+                0x00000000        0x8 main.o
  .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
  .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
  .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
@@ -233,10 +243,10 @@ END GROUP
                 0x0000006c                . = ALIGN (0x2)
  *(.text.*)
  .text.I2C_init
-                0x0000006c        0x4 main.o
+                0x0000006c        0xa main.o
                 0x0000006c                I2C_init
- .text.main     0x00000070        0xc main.o
-                0x00000070                main
+ .text.main     0x00000076        0x6 main.o
+                0x00000076                main
                 0x0000007c                . = ALIGN (0x2)
  *(.fini9)
  .fini9         0x0000007c        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_exit.o)
@@ -354,42 +364,42 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000       0x30
+.debug_aranges  0x00000000       0x58
  *(.debug_aranges)
  .debug_aranges
-                0x00000000       0x30 main.o
+                0x00000000       0x58 main.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000      0x61e
+.debug_info     0x00000000      0x6e2
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x52e C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.6.364/gcc/dev/atmega16/avr5/crtatmega16.o
- .debug_info    0x0000052e       0xf0 main.o
+ .debug_info    0x0000052e      0x1b4 main.o
 
-.debug_abbrev   0x00000000      0x59c
+.debug_abbrev   0x00000000      0x5b6
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x4e7 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.6.364/gcc/dev/atmega16/avr5/crtatmega16.o
- .debug_abbrev  0x000004e7       0xb5 main.o
+ .debug_abbrev  0x000004e7       0xcf main.o
 
-.debug_line     0x00000000      0x1ff
+.debug_line     0x00000000      0x37a
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x116 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.6.364/gcc/dev/atmega16/avr5/crtatmega16.o
- .debug_line    0x00000116       0xe9 main.o
+ .debug_line    0x00000116      0x264 main.o
 
-.debug_frame    0x00000000       0x44
+.debug_frame    0x00000000       0x94
  *(.debug_frame)
- .debug_frame   0x00000000       0x44 main.o
+ .debug_frame   0x00000000       0x94 main.o
 
-.debug_str      0x00000000      0x315
+.debug_str      0x00000000      0x387
  *(.debug_str)
  .debug_str     0x00000000      0x1af C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.6.364/gcc/dev/atmega16/avr5/crtatmega16.o
- .debug_str     0x000001af      0x166 main.o
-                                0x19f (size before relaxing)
+ .debug_str     0x000001af      0x1d8 main.o
+                                0x211 (size before relaxing)
 
-.debug_loc      0x00000000       0x35
+.debug_loc      0x00000000      0x184
  *(.debug_loc)
- .debug_loc     0x00000000       0x35 main.o
+ .debug_loc     0x00000000      0x184 main.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -409,9 +419,9 @@ END GROUP
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x00000000       0x20
+.debug_ranges   0x00000000       0x48
  *(.debug_ranges)
- .debug_ranges  0x00000000       0x20 main.o
+ .debug_ranges  0x00000000       0x48 main.o
 
 .debug_macro
  *(.debug_macro)
