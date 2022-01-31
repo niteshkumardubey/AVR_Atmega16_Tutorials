@@ -8,6 +8,14 @@
 #define RS 0
 #define RW 1
 #define EN 2
+#define D0 0
+#define D1 1
+#define D2 2
+#define D3 3
+#define D4 4
+#define D5 5
+#define D6 6
+#define D7 7
 
 #define LCD_COMMAND_MODE		false
 #define LCD_DATA_MODE			true
@@ -30,12 +38,15 @@ bool data_bitMode = false;
 
 void LCD_16X2_init(bool four_bit_mode)
 {
-	LCD_COMMAND_PORT_DDR = 0xff;
-	LCD_DATA_PORT_DDR = 0xff;
+	LCD_COMMAND_PORT_DDR |= (1 << RS)|(1 << RW)|(1 << EN);
+	LCD_DATA_PORT_DDR |= (1 << D0)|(1 << D1)|(1 << D2)|(1 << D3)|(1 << D4)|(1 << D5)|(1 << D6)|(1 << D7);
+	LCD_COMMAND_PORT &= ~((1 << RS)|(1 << RW)|(1 << EN));
+	LCD_DATA_PORT_DDR &= ~((1 << D0)|(1 << D1)|(1 << D2)|(1 << D3)|(1 << D4)|(1 << D5)|(1 << D6)|(1 << D7));
 	
-	if (four_bit_mode)
+	if (four_bit_mode == LCD_4BIT_MODE)
 	{
 		data_bitMode = LCD_4BIT_MODE;
+		LCD_16X2_sendCmd(0x02);
 	}
 	else
 	{
@@ -44,10 +55,10 @@ void LCD_16X2_init(bool four_bit_mode)
 	
 	LCD_16X2_sendCmd(0x01);		// LCD clear
 	LCD_16X2_sendCmd(0x38);		// Enable dots matrix
-	//	LCD_16X2_sendCmd(0x0e);		// Display on cursor on
-	LCD_16X2_sendCmd(0x0c);		// Display on, cursor off
+	LCD_16X2_sendCmd(0x0e);		// Display on cursor on
+// 	//LCD_16X2_sendCmd(0x0c);		// Display on, cursor off
 	LCD_16X2_sendCmd(0x06);		// Increment of cursor to the right
-	LCD_16X2_sendCmd(0x80);		// Set cursor to 1st line, 1st column
+	LCD_16X2_sendCmd(0x80);		// Set cursor to 1st line, 1st column
 }
 
 void LCD_16X2_setMode(bool RS_mode)
@@ -74,8 +85,10 @@ void LCD_16X2_sendCmd(uint8_t command)
 	{
 		LCD_DATA_PORT = command & 0xf0;					// First send higher 4 bits
 		LCD_16X2_setMode(LCD_COMMAND_MODE);
-		LCD_DATA_PORT = ((command & 0x0f) << 4);		// Second time send lower 4 bits
+		_delay_ms(500);
+		LCD_DATA_PORT |= (command << 4) & 0xf0;		// Second time send lower 4 bits
 		LCD_16X2_setMode(LCD_COMMAND_MODE);
+		_delay_ms(500);
 	}
 	else
 	{
@@ -91,8 +104,10 @@ void LCD_16X2_sendChar(unsigned char data)
 	{
 		LCD_DATA_PORT = data & 0xf0;					// First send higher 4 bits
 		LCD_16X2_setMode(LCD_DATA_MODE);
-		LCD_DATA_PORT = ((data & 0x0f) << 4);			// Second time send lower 4 bits
+		_delay_ms(500);
+		LCD_DATA_PORT |= (data << 4) & 0xf0;			// Second time send lower 4 bits
 		LCD_16X2_setMode(LCD_DATA_MODE);
+		_delay_ms(500);
 	}
 	else
 	{
