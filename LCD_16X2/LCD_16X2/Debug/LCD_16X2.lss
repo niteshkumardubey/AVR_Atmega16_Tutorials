@@ -245,8 +245,8 @@ void LCD_16X2_sendFloat(double val, int afterDecimal)
 #include "lib/LCD_16X2.h"
 int main(void)
 {
-	LCD_16X2_init(LCD_4BIT_MODE);
- 1ba:	81 e0       	ldi	r24, 0x01	; 1
+	LCD_16X2_init(LCD_8BIT_MODE);
+ 1ba:	80 e0       	ldi	r24, 0x00	; 0
  1bc:	0e 94 87 00 	call	0x10e	; 0x10e <LCD_16X2_init>
 // 	LCD_16X2_sendString("I love my India.");
  	LCD_16X2_sendChar('N');
