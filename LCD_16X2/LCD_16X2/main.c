@@ -12,8 +12,8 @@
 #include "lib/LCD_16X2.h"
 int main(void)
 {
-	LCD_16X2_init(LCD_8BIT_MODE);
-// 	LCD_16X2_sendString("I love my India.");
+	LCD_16X2_init();
+ 	LCD_16X2_sendString("I love my India.");
  	LCD_16X2_sendChar('N');
 //	LCD_16X2_sendInt(12305);
 //	LCD_16X2_sendFloat(12.61, 3);
