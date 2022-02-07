@@ -8,18 +8,32 @@
 #define F_CPU 8000000UL
 #define F_I2C 200000
 #define I2C_TWBR (((F_CPU/F_I2C) - 16)/(2 * 64))
+#define EEPROM_WRITE_ADDRESS 0x20
+#define EEPROM_READ_ADDRESS 0x21
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <string.h>
 
 void I2C_init(void);
 uint8_t I2C_start_condition_init(char writeAddress);
+uint8_t I2C_repeated_start_condition_init(char readAddress);
+uint8_t I2C_write(char data);
+char I2C_read_ack(void);
+char I2C_read_nack(void);
 
 int main(void)
 {
+	char arr[10] = "Test";
+	int i = 0;
+	
 	I2C_init();
-    while (1) 
+	I2C_start_condition_init(EEPROM_WRITE_ADDRESS);
+	
+    while (arr[i] != '\0') 
     {
+		I2C_write(arr[i]);
+		i++;
     }
 }
 
