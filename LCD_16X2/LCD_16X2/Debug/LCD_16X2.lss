@@ -3,29 +3,29 @@ LCD_16X2.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         0000015a  00000000  00000000  00000074  2**1
+  0 .text         00000182  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000012  00800060  0000015a  000001ce  2**0
+  1 .data         00000008  00800060  00000182  000001f6  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  000001e0  2**0
+  2 .comment      00000030  00000000  00000000  000001fe  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000210  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000230  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000070  00000000  00000000  0000024c  2**0
+  4 .debug_aranges 00000078  00000000  00000000  0000026c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000b0e  00000000  00000000  000002bc  2**0
+  5 .debug_info   00000b82  00000000  00000000  000002e4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000006d6  00000000  00000000  00000dca  2**0
+  6 .debug_abbrev 000006d6  00000000  00000000  00000e66  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   000004d2  00000000  00000000  000014a0  2**0
+  7 .debug_line   000004fb  00000000  00000000  0000153c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000150  00000000  00000000  00001974  2**2
+  8 .debug_frame  0000016c  00000000  00000000  00001a38  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000460  00000000  00000000  00001ac4  2**0
+  9 .debug_str    0000047e  00000000  00000000  00001ba4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000613  00000000  00000000  00001f24  2**0
+ 10 .debug_loc    0000070c  00000000  00000000  00002022  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000060  00000000  00000000  00002537  2**0
+ 11 .debug_ranges 00000068  00000000  00000000  0000272e  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -65,18 +65,18 @@ Disassembly of section .text:
   60:	10 e0       	ldi	r17, 0x00	; 0
   62:	a0 e6       	ldi	r26, 0x60	; 96
   64:	b0 e0       	ldi	r27, 0x00	; 0
-  66:	ea e5       	ldi	r30, 0x5A	; 90
+  66:	e2 e8       	ldi	r30, 0x82	; 130
   68:	f1 e0       	ldi	r31, 0x01	; 1
   6a:	02 c0       	rjmp	.+4      	; 0x70 <__do_copy_data+0x10>
   6c:	05 90       	lpm	r0, Z+
   6e:	0d 92       	st	X+, r0
-  70:	a2 37       	cpi	r26, 0x72	; 114
+  70:	a8 36       	cpi	r26, 0x68	; 104
   72:	b1 07       	cpc	r27, r17
   74:	d9 f7       	brne	.-10     	; 0x6c <__do_copy_data+0xc>
 
 00000076 <__do_clear_bss>:
   76:	20 e0       	ldi	r18, 0x00	; 0
-  78:	a2 e7       	ldi	r26, 0x72	; 114
+  78:	a8 e6       	ldi	r26, 0x68	; 104
   7a:	b0 e0       	ldi	r27, 0x00	; 0
   7c:	01 c0       	rjmp	.+2      	; 0x80 <.do_clear_bss_start>
 
@@ -84,11 +84,11 @@ Disassembly of section .text:
   7e:	1d 92       	st	X+, r1
 
 00000080 <.do_clear_bss_start>:
-  80:	a2 37       	cpi	r26, 0x72	; 114
+  80:	a8 36       	cpi	r26, 0x68	; 104
   82:	b2 07       	cpc	r27, r18
   84:	e1 f7       	brne	.-8      	; 0x7e <.do_clear_bss_loop>
-  86:	0e 94 a1 00 	call	0x142	; 0x142 <main>
-  8a:	0c 94 ab 00 	jmp	0x156	; 0x156 <_exit>
+  86:	0e 94 b6 00 	call	0x16c	; 0x16c <main>
+  8a:	0c 94 bf 00 	jmp	0x17e	; 0x17e <_exit>
 
 0000008e <__bad_interrupt>:
   8e:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -143,8 +143,8 @@ void LCD_16X2_sendFloat(double val, int afterDecimal)
   dc:	85 b3       	in	r24, 0x15	; 21
   de:	88 7f       	andi	r24, 0xF8	; 248
   e0:	85 bb       	out	0x15, r24	; 21
-  e2:	81 b3       	in	r24, 0x11	; 17
-  e4:	11 ba       	out	0x11, r1	; 17
+  e2:	82 b3       	in	r24, 0x12	; 18
+  e4:	12 ba       	out	0x12, r1	; 18
   e6:	81 e0       	ldi	r24, 0x01	; 1
   e8:	0e 94 63 00 	call	0xc6	; 0xc6 <LCD_16X2_sendCmd>
   ec:	88 e3       	ldi	r24, 0x38	; 56
@@ -169,44 +169,64 @@ void LCD_16X2_sendFloat(double val, int afterDecimal)
  114:	cf 93       	push	r28
  116:	df 93       	push	r29
  118:	8c 01       	movw	r16, r24
- 11a:	81 e0       	ldi	r24, 0x01	; 1
- 11c:	0e 94 63 00 	call	0xc6	; 0xc6 <LCD_16X2_sendCmd>
- 120:	c0 e0       	ldi	r28, 0x00	; 0
- 122:	d0 e0       	ldi	r29, 0x00	; 0
- 124:	03 c0       	rjmp	.+6      	; 0x12c <LCD_16X2_sendString+0x1c>
- 126:	0e 94 83 00 	call	0x106	; 0x106 <LCD_16X2_sendChar>
- 12a:	21 96       	adiw	r28, 0x01	; 1
- 12c:	f8 01       	movw	r30, r16
- 12e:	ec 0f       	add	r30, r28
- 130:	fd 1f       	adc	r31, r29
- 132:	80 81       	ld	r24, Z
- 134:	81 11       	cpse	r24, r1
- 136:	f7 cf       	rjmp	.-18     	; 0x126 <LCD_16X2_sendString+0x16>
- 138:	df 91       	pop	r29
- 13a:	cf 91       	pop	r28
- 13c:	1f 91       	pop	r17
- 13e:	0f 91       	pop	r16
- 140:	08 95       	ret
+ 11a:	c0 e0       	ldi	r28, 0x00	; 0
+ 11c:	d0 e0       	ldi	r29, 0x00	; 0
+ 11e:	03 c0       	rjmp	.+6      	; 0x126 <LCD_16X2_sendString+0x16>
+ 120:	0e 94 83 00 	call	0x106	; 0x106 <LCD_16X2_sendChar>
+ 124:	21 96       	adiw	r28, 0x01	; 1
+ 126:	f8 01       	movw	r30, r16
+ 128:	ec 0f       	add	r30, r28
+ 12a:	fd 1f       	adc	r31, r29
+ 12c:	80 81       	ld	r24, Z
+ 12e:	81 11       	cpse	r24, r1
+ 130:	f7 cf       	rjmp	.-18     	; 0x120 <LCD_16X2_sendString+0x10>
+ 132:	df 91       	pop	r29
+ 134:	cf 91       	pop	r28
+ 136:	1f 91       	pop	r17
+ 138:	0f 91       	pop	r16
+ 13a:	08 95       	ret
 
-00000142 <main>:
-#include <avr/io.h>
+0000013c <LCD_16X2_sendString_XY>:
+ 13c:	cf 93       	push	r28
+ 13e:	df 93       	push	r29
+ 140:	ea 01       	movw	r28, r20
+ 142:	81 30       	cpi	r24, 0x01	; 1
+ 144:	31 f4       	brne	.+12     	; 0x152 <LCD_16X2_sendString_XY+0x16>
+ 146:	86 2f       	mov	r24, r22
+ 148:	8f 70       	andi	r24, 0x0F	; 15
+ 14a:	80 68       	ori	r24, 0x80	; 128
+ 14c:	0e 94 63 00 	call	0xc6	; 0xc6 <LCD_16X2_sendCmd>
+ 150:	07 c0       	rjmp	.+14     	; 0x160 <LCD_16X2_sendString_XY+0x24>
+ 152:	82 30       	cpi	r24, 0x02	; 2
+ 154:	29 f4       	brne	.+10     	; 0x160 <LCD_16X2_sendString_XY+0x24>
+ 156:	86 2f       	mov	r24, r22
+ 158:	8f 70       	andi	r24, 0x0F	; 15
+ 15a:	80 6c       	ori	r24, 0xC0	; 192
+ 15c:	0e 94 63 00 	call	0xc6	; 0xc6 <LCD_16X2_sendCmd>
+ 160:	ce 01       	movw	r24, r28
+ 162:	0e 94 88 00 	call	0x110	; 0x110 <LCD_16X2_sendString>
+ 166:	df 91       	pop	r29
+ 168:	cf 91       	pop	r28
+ 16a:	08 95       	ret
+
+0000016c <main>:
 #include <util/delay.h>
 #include "lib/LCD_16X2.h"
+
 int main(void)
 {
 	LCD_16X2_init();
- 142:	0e 94 68 00 	call	0xd0	; 0xd0 <LCD_16X2_init>
- 	LCD_16X2_sendString("I love my India.");
- 146:	80 e6       	ldi	r24, 0x60	; 96
- 148:	90 e0       	ldi	r25, 0x00	; 0
- 14a:	0e 94 88 00 	call	0x110	; 0x110 <LCD_16X2_sendString>
- 	LCD_16X2_sendChar('N');
- 14e:	8e e4       	ldi	r24, 0x4E	; 78
- 150:	0e 94 83 00 	call	0x106	; 0x106 <LCD_16X2_sendChar>
- 154:	ff cf       	rjmp	.-2      	; 0x154 <main+0x12>
+ 16c:	0e 94 68 00 	call	0xd0	; 0xd0 <LCD_16X2_init>
+	LCD_16X2_sendString_XY (2, 3, "Nitesh");
+ 170:	40 e6       	ldi	r20, 0x60	; 96
+ 172:	50 e0       	ldi	r21, 0x00	; 0
+ 174:	63 e0       	ldi	r22, 0x03	; 3
+ 176:	82 e0       	ldi	r24, 0x02	; 2
+ 178:	0e 94 9e 00 	call	0x13c	; 0x13c <LCD_16X2_sendString_XY>
+ 17c:	ff cf       	rjmp	.-2      	; 0x17c <main+0x10>
 
-00000156 <_exit>:
- 156:	f8 94       	cli
+0000017e <_exit>:
+ 17e:	f8 94       	cli
 
-00000158 <__stop_program>:
- 158:	ff cf       	rjmp	.-2      	; 0x158 <__stop_program>
+00000180 <__stop_program>:
+ 180:	ff cf       	rjmp	.-2      	; 0x180 <__stop_program>

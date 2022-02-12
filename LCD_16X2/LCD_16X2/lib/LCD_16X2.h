@@ -29,6 +29,7 @@ void LCD_16X2_init(void);
 void LCD_16X2_sendCmd(uint8_t command);
 void LCD_16X2_sendChar(unsigned char data);
 void LCD_16X2_sendString(char* string);
+void LCD_16X2_sendString_XY (char row, char column, char *str);
 void LCD_16X2_sendInt(long val);
 void LCD_16X2_sendFloat(double val, int afterDecimal);
 
@@ -39,7 +40,7 @@ void LCD_16X2_init(void)
 	LCD_COMMAND_PORT_DDR |= (1 << RS)|(1 << RW)|(1 << EN);
 	LCD_DATA_PORT_DDR |= (1 << D0)|(1 << D1)|(1 << D2)|(1 << D3)|(1 << D4)|(1 << D5)|(1 << D6)|(1 << D7);
 	LCD_COMMAND_PORT &= ~((1 << RS)|(1 << RW)|(1 << EN));
-	LCD_DATA_PORT_DDR &= ~((1 << D0)|(1 << D1)|(1 << D2)|(1 << D3)|(1 << D4)|(1 << D5)|(1 << D6)|(1 << D7));
+	LCD_DATA_PORT &= ~((1 << D0)|(1 << D1)|(1 << D2)|(1 << D3)|(1 << D4)|(1 << D5)|(1 << D6)|(1 << D7));
 	
 	LCD_16X2_sendCmd(0x01);		// LCD clear
 	LCD_16X2_sendCmd(0x38);		// Enable dots matrix
@@ -82,12 +83,21 @@ void LCD_16X2_sendChar(unsigned char data)
 void LCD_16X2_sendString(char* string)
 {
 	size_t i = 0;
-	LCD_16X2_sendCmd(0x01); // Clear display
+//	LCD_16X2_sendCmd(0x01); // Clear display
 	while(string[i] != '\0')
 	{
 		LCD_16X2_sendChar(string[i]);
 		i++;
 	}
+}
+
+void LCD_16X2_sendString_XY (char row, char column, char *string)	// Send string to LCD function
+{
+	if (row == 1)
+	LCD_16X2_sendCmd((column & 0x0F)|0x80);			// Command of first row and required position<16 
+	else if (row == 2)
+	LCD_16X2_sendCmd((column & 0x0F)|0xC0);			// Command of Second row and required position<16 
+	LCD_16X2_sendString(string);						// Call LCD string function 
 }
 
 void reverse(char* string, int len)
