@@ -17,7 +17,7 @@
 #define Slave_Read_Address		0x21
 #define	count					10
 
-int main()
+int main(void)
 {
 	char buffer[10];
 	
@@ -31,6 +31,7 @@ int main()
 		LCD_16X2_sendString_XY(2, 0, "Sending :       ");
  		I2C_startWait(Slave_Write_Address);/* Start I2C communication with SLA+W */
 		_delay_ms(5);
+		
 		for (uint8_t i = 0; i < count ; i++)
 		{
 			sprintf(buffer, "%d    ",i);
@@ -38,9 +39,11 @@ int main()
 			I2C_write(i);					/* Send Incrementing count */
 			_delay_ms(500);
 		}
+		
 		LCD_16X2_sendString_XY(2, 0, "Receiving :       ");
 		I2C_repeatedStart(Slave_Read_Address);	/* Repeated Start I2C communication with SLA+R */
 		_delay_ms(5);
+		
 		for (uint8_t i = 0; i < count; i++)
 		{
 			if(i < count - 1)
@@ -50,6 +53,7 @@ int main()
 			LCD_16X2_sendString_XY(2, 13, buffer);
 			_delay_ms(500);
 		}
+		
  		I2C_stopTransmission();							/* Stop I2C */
 	}
 }
